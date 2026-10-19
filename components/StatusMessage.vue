@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ kind: 'loading' | 'error'; title?: string }>()
+defineProps<{ kind: 'loading' | 'error' | 'note'; title?: string }>()
 </script>
 
 <template>

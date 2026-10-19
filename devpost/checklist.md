@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Run the whole journey from the welcome page through Generate, then read your resume. Does it sound like you, is anything wrong or missing, and does it look right?
   Commit: `Generate and display the resume`
 
-- [ ] **5. The resume updates itself after a meaningful commit**
+- [x] **5. The resume updates itself after a meaningful commit**
   Becomes usable: Reopening or refreshing `/resume` shows the saved resume instantly, checks for commits since `lastChecked`, and adds bullets for significant ones. A typo commit changes nothing.
   Why now: This is the "oh, that's cool" beat of the whole product, so it comes right after generation and before polish like PDFs.
   PRD ref: `prd.md > Automatic updates`, `prd.md > The Core Journey` (step 9)
@@ -71,7 +71,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 4 (first generated resume, before refresh and PDFs)
+- [x] Early usable behavior explored — after slice 4 (first generated resume, before refresh and PDFs)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -97,3 +97,6 @@ Activity mode: not started
 - Slice 3: verdicts in `data/verdicts.json` also store `repo`, `message` (first line) and `date` beside `significant` and `oneLine`, so the dev view and later refreshes can show what was judged. Pass 1 asks the model for a number per commit (not the SHA) and checks every number came back before saving a batch.
 - Slice 3 not covered by live test: the "unreadable JSON" retry-then-error path in `askJson` is code-reviewed but wasn't triggered against the real model. Ollama-unreachable was tested.
 - Slice 4: removed the temporary dev triage route and verdicts page now that Generate exists. An owner with an empty `token` in `owners.config.json` is treated as public-repos-only (available if the owner exists), so a tokenless entry works for public repos while real read-only tokens are still being created.
+- Slice 5: refresh does not use the end date typed at Generate. It re-scans each selected owner from the saved start date up to today, re-reading the repo list, so brand-new projects and late-pushed old commits are found. Only commits with no verdict cost AI time, and only significant commits no bullet covers become bullets (a Pass 2 failure is retried on the next refresh). `lastChecked` is still saved and shown but no longer decides what gets scanned. Learner found the original wording ("commits since `lastChecked`") confusing in practice: pushed a new project after generating and expected to see it.
+- Slice 5 verified: a project pushed after Generate (outside the typed range) was added as a bullet; a second refresh added 0 and left the resume identical; a failed refresh left `resume.json` byte-identical. Not separately exercised: refresh with Ollama stopped (the run hit GitHub's 60-requests-an-hour unauthenticated limit first; same code path, errors are thrown before any write). Tokenless owners share that 60/hour limit, and each refresh costs one call for the repo list plus one per repo, so real read-only tokens (5,000/hour) are needed for normal use.
+- Early hands-on feedback (after slice 4): works, but looks "pretty bare bones"; the learner plans to restyle it soon for more personality. Treat restyling as the learner's call at final review, not a slice.

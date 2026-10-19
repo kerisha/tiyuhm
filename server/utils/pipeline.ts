@@ -10,6 +10,7 @@ import {
   type SignificantCommit,
 } from './prompts'
 import { readJson, writeJson } from './store'
+import type { CommitSummary, OwnerConfig } from './github'
 
 export interface Verdict {
   significant: boolean
@@ -58,23 +59,29 @@ export async function triageCommits(commits: CommitForJudging[]): Promise<Verdic
   return verdicts
 }
 
+// Lists every authored commit in the range, but only downloads the code change for commits that
+// have no verdict yet, so repeat runs (refresh) stay cheap.
 export async function gatherCommits(
   owner: { kind: 'org' | 'user'; login: string; token?: string },
   author: string,
   from: string,
   to: string,
-): Promise<CommitForJudging[]> {
+  known: Verdicts,
+): Promise<{ listed: CommitSummary[]; fresh: CommitForJudging[] }> {
   const repos = await listRepos(owner)
-  const out: CommitForJudging[] = []
+  const listed: CommitSummary[] = []
+  const fresh: CommitForJudging[] = []
   for (const repo of repos) {
     const commits = await listAuthoredCommits(repo, author, from, to, owner.token)
     for (const c of commits) {
       if (c.isMerge) continue
+      listed.push(c)
+      if (known[c.sha]) continue
       const detail = await fetchCommitDetail(repo, c.sha, owner.token)
-      out.push({ sha: c.sha, repo, message: c.message, date: c.date, files: detail.files, patch: detail.patch })
+      fresh.push({ sha: c.sha, repo, message: c.message, date: c.date, files: detail.files, patch: detail.patch })
     }
   }
-  return out
+  return { listed, fresh }
 }
 
 function isPass2(v: unknown): v is { bullets: { text: string; commitIds: number[] }[] } {
@@ -116,6 +123,24 @@ export interface GenerateInput {
   to: string
 }
 
+const today = () => new Date().toISOString().slice(0, 10)
+
+// Significant commits in this owner's listing that no resume bullet covers yet.
+async function uncoveredSignificant(
+  owner: OwnerConfig,
+  profileUsername: string,
+  from: string,
+  to: string,
+  covered: Set<string>,
+): Promise<SignificantCommit[]> {
+  const known = await readJson<Verdicts>('verdicts.json', {})
+  const { listed, fresh } = await gatherCommits(owner, profileUsername, from, to, known)
+  const verdicts = await triageCommits(fresh)
+  return listed
+    .filter((c) => verdicts[c.sha]?.significant && !covered.has(c.sha))
+    .map((c) => ({ sha: c.sha, repo: c.repo, message: c.message.split('\n')[0], oneLine: verdicts[c.sha].oneLine, date: c.date }))
+}
+
 // Whole pipeline for Generate. Nothing is saved to resume.json unless every step succeeded.
 export async function generateResume(input: GenerateInput): Promise<Resume> {
   const configured = await readOwnersConfig()
@@ -125,11 +150,7 @@ export async function generateResume(input: GenerateInput): Promise<Resume> {
     if (!owner) {
       throw createError({ statusCode: 400, statusMessage: `"${login}" isn't in owners.config.json.` })
     }
-    const commits = await gatherCommits(owner, input.profile.username, input.from, input.to)
-    const verdicts = await triageCommits(commits)
-    const significant: SignificantCommit[] = commits
-      .filter((c) => verdicts[c.sha]?.significant)
-      .map((c) => ({ sha: c.sha, repo: c.repo, message: c.message.split('\n')[0], oneLine: verdicts[c.sha].oneLine, date: c.date }))
+    const significant = await uncoveredSignificant(owner, input.profile.username, input.from, input.to, new Set())
     const bullets = await writeBullets(owner.label, significant)
     if (bullets.length) experience.push({ ownerLabel: owner.label, periodFrom: input.from, periodTo: input.to, bullets })
   }
@@ -151,4 +172,41 @@ export async function generateResume(input: GenerateInput): Promise<Resume> {
   }
   await writeJson('resume.json', resume)
   return resume
+}
+
+// Refresh: same owners, from the original start date up to today (the end date typed at Generate
+// only bounded the first run). Adds bullets for significant commits no bullet covers yet. The saved
+// resume is only replaced after everything succeeds.
+export async function refreshResume(): Promise<{ resume: Resume; added: number }> {
+  const saved = await readJson<Resume | null>('resume.json', null)
+  if (!saved) throw createError({ statusCode: 404, statusMessage: 'There is no saved resume to refresh yet.' })
+  const configured = await readOwnersConfig()
+  const covered = new Set(saved.experience.flatMap((g) => g.bullets.flatMap((b) => b.shas)))
+  const end = today()
+  const experience = saved.experience.map((g) => ({ ...g, bullets: [...g.bullets] }))
+  let added = 0
+  for (const login of saved.selection.owners) {
+    const owner = configured.find((o) => o.login === login)
+    if (!owner) continue
+    const significant = await uncoveredSignificant(owner, saved.profile.username, saved.selection.from, end, covered)
+    if (!significant.length) continue
+    const bullets = await writeBullets(owner.label, significant)
+    if (!bullets.length) continue
+    added += bullets.length
+    const group = experience.find((g) => g.ownerLabel === owner.label)
+    if (group) {
+      group.bullets.push(...bullets)
+      group.periodTo = end
+    } else {
+      experience.push({ ownerLabel: owner.label, periodFrom: saved.selection.from, periodTo: end, bullets })
+    }
+  }
+  const next: Resume = { ...saved, experience, lastChecked: new Date().toISOString() }
+  if (added > 0) {
+    const { summary, skills } = await writeSummary(saved.profile.name || saved.profile.username, experience)
+    next.summary = summary.trim()
+    next.skills = skills
+  }
+  await writeJson('resume.json', next)
+  return { resume: next, added }
 }
