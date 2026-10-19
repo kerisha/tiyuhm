@@ -5,3 +5,10 @@
 .env
 .env.*
 !.env.example
+
+# Local app data and tokens
+node_modules
+.nuxt
+.output
+data/
+owners.config.json
