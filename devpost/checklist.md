@@ -72,10 +72,12 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after slice 4 (first generated resume, before refresh and PDFs)
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
 
+- [x] Single "Download resume" button replacing the two PDF buttons (learner request): implemented, verified, committed
+- [ ] Learner retries the download and confirms the PoC is ready to ship
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
@@ -101,3 +103,4 @@ Activity mode: not started
 - Slice 5 verified: a project pushed after Generate (outside the typed range) was added as a bullet; a second refresh added 0 and left the resume identical; a failed refresh left `resume.json` byte-identical. Not separately exercised: refresh with Ollama stopped (the run hit GitHub's 60-requests-an-hour unauthenticated limit first; same code path, errors are thrown before any write). Tokenless owners share that 60/hour limit, and each refresh costs one call for the repo list plus one per repo, so real read-only tokens (5,000/hour) are needed for normal use.
 - Early hands-on feedback (after slice 4): works, but looks "pretty bare bones"; the learner plans to restyle it soon for more personality. Treat restyling as the learner's call at final review, not a slice.
 - Slice 6: npm blocked Puppeteer's install script (new `allowScripts` gate), so Chrome is fetched with `npx puppeteer browsers install chrome` (noted in README). Verified both endpoints return valid PDFs; traditional text extracts in order (Contact, Summary, Experience, Education, Skills; headings are uppercased by CSS); magazine PDF embeds Special Elite and Courier Prime from local files with no external requests; a missing Chrome returns the clear error message.
+- Final review: the learner cut the traditional PDF. The resume page now has one **Download resume** button that downloads the on-screen look as `Resume.pdf` (route `GET /api/pdf`, print page `/print/resume`). Removed `pages/print/traditional.vue`, `assets/css/print-traditional.css` and the `[kind]` route; updated `prd.md` (Downloads, journey, scope list, palette note) and `spec.md` (PDF description, print page, file structure, open items) to match. Slice 6's earlier wording (two PDFs) is kept above as the original plan. UI restyling is deferred by the learner to after the build ("I can clean up the UI at a later date").

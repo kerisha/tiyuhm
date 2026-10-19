@@ -16,7 +16,7 @@ Four ideas make it work:
 1. **Owners.** Your work lives in several organizations plus your own account. Each place is an "owner." Each owner has its own read-only GitHub token, kept in a private config file that is never committed. The owner picker lists the owners from that file.
 2. **The AI judge and writer.** The server sends your commits to a model in two passes. Pass 1 decides which commits are real work and which are noise (typo fixes and the like), reading the code change when the message is vague. Pass 2 writes short resume bullets for the real work, then the professional summary and skills. The model runs locally through **Ollama**, a program that runs open AI models on your Mac. Because every AI call goes through one small adapter, we can switch to a free hosted model without touching anything else.
 3. **A saved resume.** The finished resume, a "last checked" timestamp and the AI's past verdicts go into JSON files in a `data/` folder. When you come back, the saved resume appears. The server then asks GitHub only for commits newer than the timestamp, runs just those through the AI, and adds any new bullets.
-4. **PDFs from the same pages.** There are two plain "print" pages, magazine and traditional. To download, the server opens one in a hidden browser (**Puppeteer**) and saves it as a PDF.
+4. **PDFs from the same pages.** There is one plain "print" page. To download, the server opens it in a hidden browser (**Puppeteer**) and saves it as a PDF.
 
 Why this shape and not something bigger: no login system, no database server, no background jobs and no live sync. Your PRD only needs the resume to be current when you return or refresh, and a file plus a check on page load does exactly that.
 
@@ -36,7 +36,7 @@ Implements `prd.md > The Core Journey`.
    - saves `data/resume.json` and the per-commit verdicts in `data/verdicts.json`.
    If nothing is significant, you see the no-meaningful-commits message.
 7. **Resume page** (`/resume`) shows contact information, summary, experience, education and skills, plus two download buttons.
-8. **Download.** A button calls `GET /api/pdf/magazine` or `GET /api/pdf/traditional`. The server opens `/print/magazine` or `/print/traditional` in headless Chromium, saves the PDF, and sends it to the browser.
+8. **Download.** A button calls `GET /api/pdf`. The server opens `/print/resume` in headless Chromium, saves the PDF, and sends it to the browser.
 9. **Later.** You make a meaningful commit and reopen or refresh `/resume`. The page shows the saved resume at once and a small "checking for new work" note while it calls `POST /api/resume/refresh`. The server fetches commits since the last-checked time, runs only those through Pass 1 and, for significant ones, Pass 2, adds the bullets, updates the summary and skills, and saves. The page re-renders. A typo-level commit gets a "trivial" verdict and changes nothing (`prd.md > Automatic updates`).
 
 ```mermaid
@@ -57,7 +57,7 @@ flowchart LR
 - **GitHub REST API** with read-only fine-grained tokens, called with plain `fetch` from server routes. Docs: https://docs.github.com/en/rest
 - **Ollama**, with a local instruct model for the AI passes. Docs: https://github.com/ollama/ollama/blob/main/docs/api.md. The learner prefers local; the learner has an M-series Mac. The model is a build-start decision. I suggest trying an 8B-class instruct model (such as Llama 3.1 8B or Qwen 2.5 7B) and moving up if bullet quality is weak. Unverified: which model gives acceptable bullets and speed on this Mac; check early.
 - **Hosted free-tier model (fallback only).** The adapter's second implementation will speak the common OpenAI-style chat format that several free tiers offer. No provider is chosen, and I could not confirm any free-tier terms today. Choose and verify only if Ollama fails.
-- **Puppeteer** for both PDFs. Docs: https://pptr.dev. The learner has not used it; accepted as "fine if it does the job." It downloads its own Chromium on install (about 150MB), which is fine for local running.
+- **Puppeteer** for the PDF. Docs: https://pptr.dev. The learner has not used it; accepted as "fine if it does the job." It downloads its own Chromium on install (about 150MB), which is fine for local running.
 - **Fonts via Fontsource** (self-hosted font files in the project), so Puppeteer's PDFs render the typewriter font without internet. Docs: https://fontsource.org
 - **Storage:** plain JSON files under `data/` (derived implementation detail; replaces SQLite from the conversation, because the saved data is one resume plus a lookup table and needs no queries).
 
@@ -72,7 +72,7 @@ Start: `npm install`, then `npm run dev`, then open http://localhost:3000.
 
 For the demo recording, show:
 1. Welcome → Get started → profile → owners → dates → Generate → the resume.
-2. Both PDFs downloading and opening.
+2. The PDF downloading and opening.
 3. A meaningful commit made in one of the repos, then a refresh that updates the resume. A typo commit changes nothing.
 
 Reset to a first-run state by deleting the `data/` folder.
@@ -98,7 +98,7 @@ Dusty Olive on Almond Cream is the only dark-on-light pairing, and its contrast 
 
 **Layout:** every screen is a centered resume-shaped sheet (single column, generous margins, a thin bronze rule under section headings) on the sand surface. The resume page adds magazine touches: large masthead name, pull-quote-style summary, section kickers in small caps. Tone of copy: short, warm, a little witty ("Let's read your work.").
 
-**Traditional PDF page:** plain black on white, one column, standard headings (Contact, Summary, Experience, Education, Skills), a sans-serif system font, no decoration, so it stays filter-safe (`prd.md > Downloads`).
+**PDF:** the print page reuses the on-screen resume look (palette and typewriter fonts). The separate plain "traditional" PDF was cut at build review.
 
 ## Components
 
@@ -117,8 +117,8 @@ PRD ref: `prd.md > Getting started and connecting GitHub`, `prd.md > Choosing or
 Renders the saved resume (magazine style), the two download buttons, and the "checking for new work" refresh on load.
 PRD ref: `prd.md > The generated resume`, `prd.md > Downloads`, `prd.md > Automatic updates`.
 
-#### Print pages (`pages/print/magazine.vue`, `pages/print/traditional.vue`)
-Bare pages with no app chrome, used only by Puppeteer. Both read `data/resume.json` through the server. The traditional page is single-column semantic HTML (`h1`, `h2`, `ul`) so the PDF text is selectable in reading order.
+#### Print page (`pages/print/resume.vue`)
+A bare page with no app chrome, used only by Puppeteer. It reads `data/resume.json` through the server and renders `ResumeBody`.
 PRD ref: `prd.md > Downloads`.
 
 ### Server routes
@@ -179,22 +179,20 @@ tiyuhm/
 │   ├── start.vue                  # Setup flow: profile, owners, dates, Generate, errors
 │   ├── resume.vue                 # Magazine-style resume, downloads, refresh-on-load
 │   └── print/
-│       ├── magazine.vue           # Page Puppeteer prints for the magazine PDF
-│       └── traditional.vue        # Plain page Puppeteer prints for the filter-safe PDF
+│       └── resume.vue             # Page Puppeteer prints for the PDF
 ├── components/
 │   ├── ResumeSheet.vue            # The shared resume-shaped page wrapper
 │   ├── ResumeBody.vue             # The five resume sections (shared by screen and prints)
 │   └── StatusMessage.vue          # Loading and error messages
 ├── assets/css/
-│   ├── theme.css                  # Palette variables, typography, sheet look
-│   └── print-traditional.css      # Plain black-on-white styles
+│   └── theme.css                  # Palette variables, typography, sheet look
 ├── server/
 │   ├── api/
 │   │   ├── github/profile.post.ts # Look up profile, list owners
 │   │   ├── resume/index.get.ts    # Return the saved resume (or none)
 │   │   ├── resume/generate.post.ts
 │   │   ├── resume/refresh.post.ts
-│   │   └── pdf/[kind].get.ts      # Puppeteer PDF for magazine / traditional
+│   │   └── pdf/index.get.ts        # Puppeteer PDF of the resume
 │   └── utils/
 │       ├── github.ts              # GitHub REST calls
 │       ├── pipeline.ts            # Fetch, triage, write, merge
@@ -263,16 +261,16 @@ Docs: https://pptr.dev. `puppeteer.launch()` → `page.goto(<local print URL>)` 
 ### Decisions
 - **Vue with Nuxt, custom CSS (no Quasar)** — learner's choice (polished demo in a familiar stack over learning Rust). Tradeoff: Nuxt conventions to learn.
 - **AI summarizing the commits is a core piece, through a provider adapter, with Ollama preferred and a free hosted model as fallback** — learner's choice, because they have no API credits. Tradeoff: local model quality and speed, to be tested early.
-- **Puppeteer for both PDFs** — learner accepted it as long as it does the job. Tradeoff: large install.
+- **Puppeteer for the PDF** — learner accepted it as long as it does the job. Tradeoff: large install.
 - **Updates checked on page load** from commits newer than `lastChecked` — learner agreed.
 - **Read-only fine-grained token per owner; "Personal projects" as an owner; only commits authored by the entered username count** — learner agreed (strictly read-only is the learner's firm requirement).
 - **Derived by me from those choices, not separately discussed (change at review if wanted):** JSON files for storage; start and end dates for the time period; skills inferred by the AI from the languages and projects in the significant work; the color-role assignments and font suggestions in Look and Feel; the 150-commit cap; one experience group per owner with bullets dated and the period range extended on refresh; unauthenticated, local-only use.
 
 ### The learner's open uncertainty
-Puppeteer was unfamiliar to the learner. What will clarify it: in the first build steps, a small spike that produces both PDFs from the print pages with placeholder data. Evidence needed: the magazine PDF shows the typewriter font and colors, and the traditional PDF's text can be selected and pasted in a sensible reading order.
+Puppeteer was unfamiliar to the learner. What will clarify it: in the first build steps, a small spike that produces the PDF from the print page. Evidence needed: the PDF shows the typewriter font and colors.
 
 ### Unresolved or to verify early in the build
 - Which local Ollama model gives acceptable bullet quality and speed on the learner's Mac (and, if none, which hosted free tier to use).
 - Whether each organization allows or approves a fine-grained read-only token.
 - Current Nuxt version, exact GitHub endpoints and Ollama's structured-output behavior, which I described from memory and have not looked up.
-- From `prd.md > Open Questions`: the traditional PDF stays plain black on white (assumption, confirm at review); reopening the app shows the saved resume (assumption, confirm at review); private repositories are readable only for owners whose token covers them (settled here).
+- From `prd.md > Open Questions`: the PDF matches the on-screen look (resolved at build); reopening the app shows the saved resume (assumption, confirm at review); private repositories are readable only for owners whose token covers them (settled here).

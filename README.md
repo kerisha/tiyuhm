@@ -11,4 +11,4 @@ Reads your GitHub history, writes a resume from it, and keeps it current as you 
 Reset to first-run by deleting the `data/` folder. `.env`, `owners.config.json` and `data/` are gitignored.
 
 ## PDFs
-The two PDF buttons use Puppeteer, which needs its own Chrome. If npm skipped the download, run `npx puppeteer browsers install chrome`.
+The PDF button uses Puppeteer, which needs its own Chrome. If npm skipped the download, run `npx puppeteer browsers install chrome`.

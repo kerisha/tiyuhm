@@ -16,10 +16,10 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`, `scope.md > 
 5. They select a time period.
 6. They click **Generate**. A loading state appears while the resume is built.
 7. The resume page appears: contact information, professional summary, experience, education, skills.
-8. They can download it as a magazine-style PDF or as a traditional filter-ready PDF, at any point.
+8. They can download it as a PDF that matches the on-screen resume, at any point.
 9. Later, they make a meaningful new commit. When they come back or refresh the page, the resume has updated itself. A trivial commit (such as a typo fix) changes nothing.
 
-Success: the resume looks right on first generation, both PDFs download, and the resume changes by itself after a meaningful commit (`scope.md > What "Working" Looks Like`).
+Success: the resume looks right on first generation, the PDF downloads, and the resume changes by itself after a meaningful commit (`scope.md > What "Working" Looks Like`).
 
 ## Screens and Layout
 Every screen shares a resume-like page layout so the whole app has one consistent theme.
@@ -39,7 +39,7 @@ Direction from the learner:
 - **Concept:** a fashion magazine for tech, "showcasing my masterpieces."
 - **Typography:** a typewriter font is the learner's pick.
 - **Overall:** a resume-shaped page throughout, with a magazine feel and a tech twist.
-- **Constraint:** the traditional download must follow real resume conventions (see Downloads).
+- **Constraint (revised at build):** the PDF is the on-screen resume as is. The separate plain "traditional" PDF was cut.
 - **Goal:** it should carry a recognizable personal style, not generic AI-app styling (`learner-profile.md > Desired Learning Outcome`).
 
 **Color palette** (the learner's choice, an earthy, warm set):
@@ -50,7 +50,7 @@ Direction from the learner:
 - Dry Sage `#A5A58D` — gentle yellow-green
 - Dusty Olive `#6B705C` — subdued olive, the darkest of the six
 
-Which color plays which role (page background, text, accents) is left to `4-spec` and the build to propose. Dusty Olive is the only dark color, so it is the natural candidate for text, and readability should be checked on screen. The traditional PDF stays plain (see Downloads) and may use little or none of the palette. No references beyond the palette and the magazine concept were given.
+Which color plays which role (page background, text, accents) is left to `4-spec` and the build to propose. Dusty Olive is the only dark color, so it is the natural candidate for text, and readability should be checked on screen. The PDF uses the same palette as the screen. No references beyond the palette and the magazine concept were given.
 
 ## Features and Behavior
 
@@ -79,12 +79,9 @@ Which color plays which role (page background, text, accents) is left to `4-spec
   - [ ] Typo-level commits do not appear as bullets.
 
 ### Downloads
-Two PDF downloads, available at any point after generation:
-- **Magazine PDF** — carries the full magazine look and feel.
-- **Traditional PDF** — a plain, conventional single-column resume without the clutter, safe for recruiters and applicant-tracking filters.
-  - [ ] Both buttons produce a PDF file.
-  - [ ] The magazine PDF visibly matches the on-screen magazine style.
-  - [ ] The traditional PDF is plain, with standard headings, and its text can be selected and copied in a sensible reading order.
+One PDF download ("Download resume"), available at any point after generation. It is the resume as it looks on screen, with the full magazine look and feel.
+  - [ ] The button produces a PDF file.
+  - [ ] The PDF visibly matches the on-screen style, and its text can be selected and copied.
 
 ### Automatic updates
 - As the developer, I want my resume to update itself so it is already current when a recruiter asks.
@@ -107,7 +104,7 @@ Two PDF downloads, available at any point after generation:
 - Step order is profile, organizations, time period, generate — the learner's sequence.
 - Typewriter font and a tech-fashion-magazine mood — the learner's direction.
 - Earthy six-color palette (bronze, sand, cream, greys, sage, olive) — the learner supplied it.
-- Two PDF downloads, magazine and traditional — the learner chose the full magazine look in the PDF over a single plain one, and added a filter-ready option so recruiters and applicant-tracking filters are still served.
+- One PDF download matching the on-screen resume. (Originally two, magazine and traditional; the learner cut the traditional one at build review.)
 - Contact info comes from the GitHub profile; education is demo placeholder data — the learner's choice for the sake of the demo.
 - Updates are seen on return or refresh, not live — the learner's choice for the demo.
 - All three first-run problems show an error that states the reason and that we cannot move forward — the learner's choice, same handling for each.
@@ -116,7 +113,7 @@ Two PDF downloads, available at any point after generation:
 - Welcome page, GitHub profile form, loading screens, organization picker, time period step, Generate.
 - Resume built from commits and pull requests, with significance filtering.
 - Five-section resume page with a magazine look.
-- Two PDF downloads: magazine and traditional.
+- One PDF download: the resume as on screen.
 - Automatic updates from future significant commits, seen on return or refresh.
 - Error messages for the three first-run problems.
 
@@ -139,7 +136,7 @@ Two PDF downloads, available at any point after generation:
 - Recovering from the three first-run errors — the app stops with a message.
 
 ## Open Questions
-- **Palette in the traditional PDF.** Assumption: it stays plain (black text on white) for filter safety, with the palette used on screen and in the magazine PDF. Confirm at review.
+- **Palette in the PDF.** Resolved at build: the PDF uses the same palette as the screen; the plain traditional PDF was cut.
 - **How is the time period chosen?** Assumption: a start and end date. Can be settled in `4-spec`.
 - **Skills source.** Assumption: inferred from languages and projects in the commits. Can be settled in `4-spec`.
 - **Returning-user screen.** Assumption: reopening shows the saved resume. Should be confirmed at review.

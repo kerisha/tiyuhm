@@ -3,22 +3,22 @@ const { data: resume } = await useFetch<Resume | null>('/api/resume')
 if (!resume.value) await navigateTo('/')
 
 const downloadError = ref('')
-const downloading = ref('')
+const downloading = ref(false)
 
-async function download(kind: 'magazine' | 'traditional') {
+async function download() {
   downloadError.value = ''
-  downloading.value = kind
+  downloading.value = true
   try {
-    const blob = await $fetch<Blob>(`/api/pdf/${kind}`, { responseType: 'blob' })
+    const blob = await $fetch<Blob>('/api/pdf', { responseType: 'blob' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = kind === 'magazine' ? 'Resume-Magazine.pdf' : 'Resume.pdf'
+    a.download = 'Resume.pdf'
     a.click()
     URL.revokeObjectURL(a.href)
-  } catch (e: any) {
+  } catch {
     downloadError.value = "We couldn't make that PDF. Check that Chrome is installed for Puppeteer, then try again."
   } finally {
-    downloading.value = ''
+    downloading.value = false
   }
 }
 
@@ -47,11 +47,8 @@ onMounted(async () => {
     <StatusMessage v-if="checking" kind="loading">Checking for new work</StatusMessage>
     <StatusMessage v-else-if="note" :kind="noteIsError ? 'error' : 'note'">{{ note }}</StatusMessage>
     <div v-if="resume" class="downloads">
-      <button class="button" :disabled="!!downloading" @click="download('magazine')">
-        {{ downloading === 'magazine' ? 'Making PDF…' : 'Download magazine PDF' }}
-      </button>
-      <button class="button" :disabled="!!downloading" @click="download('traditional')">
-        {{ downloading === 'traditional' ? 'Making PDF…' : 'Download traditional PDF' }}
+      <button class="button" :disabled="downloading" @click="download">
+        {{ downloading ? 'Making PDF…' : 'Download resume' }}
       </button>
     </div>
     <StatusMessage v-if="downloadError" kind="error" title="PDF problem">{{ downloadError }}</StatusMessage>
