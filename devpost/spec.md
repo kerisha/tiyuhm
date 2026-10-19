@@ -162,7 +162,7 @@ All stored as JSON under `data/`. Created on first Generate; deleting the folder
 - `summary`: string. Rewritten when a refresh adds bullets.
 - `experience`: list of `{ ownerLabel, periodFrom, periodTo, bullets: [{ text, date, shas: [] }] }`, one group per owner. Each refresh appends new bullets to its owner's group and extends the period end. This is how updates add to the resume rather than rebuild it.
 - `skills`: list of strings.
-- `education`: demo data, flagged `isDemo: true` and labeled as demo content on screen and in the PDFs.
+- `education`: demo data (flagged `isDemo: true` in the data, but shown without any demo label, per the learner's call at final review).
 - `lastChecked`: ISO timestamp, moved forward after each successful generate or refresh.
 
 **`data/verdicts.json`**, a lookup from commit SHA to `{ significant, oneLine }`. Stops a commit from being judged twice, and lets a refresh skip anything seen.
@@ -198,7 +198,7 @@ tiyuhm/
 │       ├── pipeline.ts            # Fetch, triage, write, merge
 │       ├── prompts.ts             # The AI prompts
 │       ├── store.ts               # Read/write data/ JSON
-│       ├── demoEducation.ts       # Placeholder education (labeled demo)
+│       ├── demoEducation.ts       # Placeholder education
 │       └── ai/
 │           ├── index.ts           # askJson() adapter entry
 │           ├── ollama.ts          # Local model
@@ -252,7 +252,7 @@ Docs: https://pptr.dev. `puppeteer.launch()` → `page.goto(<local print URL>)` 
 - **JSON files** instead of a database — one resume and a lookup table need no queries.
 - **Check on page load** instead of background jobs, webhooks or live sync — matches the PRD choice of "seen on return or refresh."
 - **Local model through an adapter** instead of a paid hosted API — the learner has no API credits. The AI judgment itself is real, not faked.
-- **Demo education** instead of real entry — the PRD already settles this, and it is labeled as demo.
+- **Demo education** instead of real entry — the PRD already settles this, and it is not labeled as demo on screen (learner's call at final review).
 - **One AI model for both passes** (simpler to configure) instead of a small model for triage and a large one for writing. This can be added later if generation is too slow.
 - **No resume editing**, no job-description tailoring, no deployment — all deferred in the PRD or optional.
 

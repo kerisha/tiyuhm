@@ -1,4 +1,4 @@
-// Placeholder education, labeled as demo on screen and in the PDFs.
+// Placeholder education. Shown without a demo label (learner's choice).
 export const demoEducation: Resume['education'] = [
-  { school: 'Example University', degree: 'B.S. in Computer Science', years: '2012 – 2016', isDemo: true },
+  { school: 'Example University', degree: 'B.S. in Computer Science', years: '2013 – 2016', isDemo: true },
 ]

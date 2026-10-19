@@ -72,7 +72,7 @@ Which color plays which role (page background, text, accents) is left to `4-spec
 - **Contact information** comes straight from the GitHub profile.
 - **Professional summary** is written from the experience.
 - **Experience** has succinct bullets per organization and period. Commits are signals, not content; trivial commits are skipped, and vague commit messages are summarized from the code change.
-- **Education** is placeholder demo data, not from GitHub: a BSc in Electrical and Computer Engineering, plus 1–3 professional certifications. It is labeled as demo content in the build.
+- **Education** is placeholder demo data, not from GitHub: a BSc in Electrical and Computer Engineering, plus 1–3 professional certifications. It is not labeled as demo on screen (learner's call at final review).
 - **Skills** are inferred from the languages and projects in the commit history (assumption, see Open Questions).
   - [ ] All five sections appear on the generated resume.
   - [ ] Experience is grouped by organization and time period.

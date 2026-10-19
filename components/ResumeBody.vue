@@ -39,7 +39,6 @@ function month(iso: string) {
       <h2><span class="kicker">Education</span></h2>
       <p v-for="e in resume.education" :key="e.school">
         <strong>{{ e.school }}</strong>, {{ e.degree }}, {{ e.years }}
-        <em v-if="e.isDemo" class="demo"> (demo content: replace with your own)</em>
       </p>
     </section>
 
@@ -66,5 +65,4 @@ h3 { margin-bottom: 0; }
 .period { margin: 0 0 0.4rem; color: var(--ink); font-variant: small-caps; letter-spacing: 0.08em; }
 .group ul { padding-left: 1.2rem; margin-top: 0.4rem; }
 .group li { margin-bottom: 0.5rem; }
-.demo { font-weight: 400; }
 </style>
