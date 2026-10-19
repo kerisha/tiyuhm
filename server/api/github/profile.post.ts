@@ -4,5 +4,8 @@ export default defineEventHandler(async (event) => {
   if (!username || !/^[A-Za-z0-9-]{1,39}$/.test(username)) {
     throw createError({ statusCode: 400, statusMessage: 'Enter a valid GitHub username (letters, numbers and hyphens).' })
   }
-  return await fetchProfile(username)
+  const profile = await fetchProfile(username)
+  const configured = await readOwnersConfig()
+  const owners = await Promise.all(configured.map(verifyOwner))
+  return { profile, owners }
 })

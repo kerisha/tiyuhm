@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Open http://localhost:3000, click Get started, enter your GitHub username, and say whether the page feels like the typewriter-magazine look you pictured. Try a nonsense username too.
   Commit: `Scaffold Nuxt app with welcome page and GitHub profile lookup`
 
-- [ ] **2. You can pick owners and a time period, and Generate unlocks**
+- [x] **2. You can pick owners and a time period, and Generate unlocks**
   Becomes usable: After the profile loads, you see your configured owners (organizations plus "Personal projects"), tick some, set start and end dates, and Generate unlocks only when valid. The no-accessible-owners message works.
   Why now: Finds out early whether each owner's read-only token actually works (and whether organizations approve them), which the whole kernel depends on.
   PRD ref: `prd.md > Choosing organizations and time period`, `prd.md > States and Boundaries` (no organizations)

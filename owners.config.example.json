@@ -1,0 +1,4 @@
+[
+  { "label": "Acme Corp", "kind": "org", "login": "acme-corp", "token": "github_pat_READ_ONLY_TOKEN_FOR_THIS_ORG" },
+  { "label": "Personal projects", "kind": "user", "login": "your-github-username", "token": "github_pat_READ_ONLY_TOKEN_FOR_YOUR_ACCOUNT" }
+]
