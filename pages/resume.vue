@@ -48,7 +48,7 @@ onMounted(async () => {
     <StatusMessage v-else-if="note" :kind="noteIsError ? 'error' : 'note'">{{ note }}</StatusMessage>
     <div v-if="resume" class="downloads">
       <button class="button" :disabled="downloading" @click="download">
-        {{ downloading ? 'Making PDF…' : 'Download resume' }}
+        {{ downloading ? 'Making PDF…' : 'Download My Resume' }}
       </button>
     </div>
     <StatusMessage v-if="downloadError" kind="error" title="PDF problem">{{ downloadError }}</StatusMessage>
