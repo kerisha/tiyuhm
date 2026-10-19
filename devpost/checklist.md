@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Create your read-only tokens, fill in `owners.config.json`, then walk the form: pick owners, set dates, and confirm Generate only unlocks once both are done.
   Commit: `Add owner picker, time period and gated Generate`
 
-- [ ] **3. The AI judges your commits: meaningful or noise**
+- [x] **3. The AI judges your commits: meaningful or noise**
   Becomes usable: For a chosen owner and date range, the app fetches your authored commits, asks the local model which are significant, and stores each verdict. You can see the verdicts (significant vs trivial, with a one-line reason) in a simple dev view.
   Why now: This is the unique kernel and the biggest risk (local model quality and speed, Ollama structured output). Finding out now tells us whether we need the hosted fallback before anything is built on top.
   PRD ref: `prd.md > The generated resume` (significance filtering), `prd.md > Automatic updates`
@@ -93,3 +93,6 @@ Activity mode: not started
 ## Revisions
 
 - Model decision (build start): Ollama model is `gemma4:12b` at `http://127.0.0.1:11434` (verified running and pulled). Use `OLLAMA_MODEL=gemma4:12b` and `OLLAMA_URL=http://127.0.0.1:11434` in `.env.example`. Gemma 4 is a thinking-capable model, so slice 3 must verify schema-constrained output still works and watch speed.
+- Slice 3: Ollama calls send `think: false`. Measured on `gemma4:12b`: about 2s per call versus about 17s with thinking on, with the same verdicts (and thinking mode returned a truncated `oneLine`). Schema-constrained output works.
+- Slice 3: verdicts in `data/verdicts.json` also store `repo`, `message` (first line) and `date` beside `significant` and `oneLine`, so the dev view and later refreshes can show what was judged. Pass 1 asks the model for a number per commit (not the SHA) and checks every number came back before saving a batch.
+- Slice 3 not covered by live test: the "unreadable JSON" retry-then-error path in `askJson` is code-reviewed but wasn't triggered against the real model. Ollama-unreachable was tested.

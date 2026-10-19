@@ -114,3 +114,87 @@ export async function verifyOwner(owner: OwnerConfig): Promise<OwnerStatus> {
   }
   return { ...base, available: true }
 }
+
+export interface CommitSummary {
+  sha: string
+  repo: string // owner/name
+  message: string
+  date: string
+  isMerge: boolean
+}
+
+export interface CommitDetail {
+  files: string[]
+  patch: string
+}
+
+async function ghJson(url: string, token?: string): Promise<any> {
+  let res: Response
+  try {
+    res = await fetch(url, { headers: headers(token) })
+  } catch {
+    throw createError({ statusCode: 502, statusMessage: "Couldn't reach GitHub. Check your connection and try again." })
+  }
+  if (res.status === 409) return [] // empty repository
+  if (res.status === 401) throw createError({ statusCode: 401, statusMessage: 'GitHub rejected a token. Check owners.config.json.' })
+  if (res.status === 403 || res.status === 429) {
+    throw createError({ statusCode: 429, statusMessage: 'GitHub refused the request (rate limit or missing permission).' })
+  }
+  if (!res.ok) throw createError({ statusCode: 502, statusMessage: `GitHub answered with an unexpected error (${res.status}).` })
+  return res.json()
+}
+
+async function ghPaged(url: string, token?: string, maxPages = 10): Promise<any[]> {
+  const out: any[] = []
+  for (let page = 1; page <= maxPages; page++) {
+    const batch = await ghJson(`${url}${url.includes('?') ? '&' : '?'}per_page=100&page=${page}`, token)
+    out.push(...batch)
+    if (batch.length < 100) break
+  }
+  return out
+}
+
+export async function listRepos(owner: { kind: 'org' | 'user'; login: string; token?: string }): Promise<string[]> {
+  const path =
+    owner.kind === 'org'
+      ? `/orgs/${encodeURIComponent(owner.login)}/repos?type=all`
+      : owner.token
+        ? '/user/repos?affiliation=owner'
+        : `/users/${encodeURIComponent(owner.login)}/repos?type=owner`
+  const repos = await ghPaged(`${API}${path}`, owner.token)
+  return repos.map((r) => r.full_name as string)
+}
+
+export async function listAuthoredCommits(
+  repo: string,
+  author: string,
+  from: string,
+  to: string,
+  token?: string,
+): Promise<CommitSummary[]> {
+  const since = new Date(`${from}T00:00:00Z`).toISOString()
+  const until = new Date(`${to}T23:59:59Z`).toISOString()
+  const url = `${API}/repos/${repo}/commits?author=${encodeURIComponent(author)}&since=${since}&until=${until}`
+  const commits = await ghPaged(url, token)
+  return commits.map((c) => ({
+    sha: c.sha,
+    repo,
+    message: c.commit.message,
+    date: c.commit.author?.date ?? c.commit.committer?.date,
+    isMerge: (c.parents?.length ?? 0) > 1,
+  }))
+}
+
+const PATCH_LIMIT = 2000
+
+// Files changed plus a truncated patch, so one huge diff can't swamp the model's context.
+export async function fetchCommitDetail(repo: string, sha: string, token?: string): Promise<CommitDetail> {
+  const c = await ghJson(`${API}/repos/${repo}/commits/${sha}`, token)
+  const files: any[] = c.files ?? []
+  let patch = ''
+  for (const f of files) {
+    if (patch.length >= PATCH_LIMIT) break
+    patch += `--- ${f.filename}\n${f.patch ?? '(binary or too large to show)'}\n`
+  }
+  return { files: files.map((f) => f.filename as string), patch: patch.slice(0, PATCH_LIMIT) }
+}
