@@ -9,3 +9,6 @@ Reads your GitHub history, writes a resume from it, and keeps it current as you 
 4. `npm install`, then `npm run dev`, then open http://localhost:3000
 
 Reset to first-run by deleting the `data/` folder. `.env`, `owners.config.json` and `data/` are gitignored.
+
+## PDFs
+The two PDF buttons use Puppeteer, which needs its own Chrome. If npm skipped the download, run `npx puppeteer browsers install chrome`.

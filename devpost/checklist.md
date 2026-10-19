@@ -59,7 +59,7 @@ Build mode: fast
   Learner check: Make a real meaningful commit and a typo commit, refresh the resume, and confirm only the real one shows up.
   Commit: `Add automatic resume refresh from new commits`
 
-- [ ] **6. You can download the magazine and traditional PDFs**
+- [x] **6. You can download the magazine and traditional PDFs**
   Becomes usable: Two buttons on the resume page download a magazine-styled PDF and a plain filter-safe PDF.
   Why now: Puppeteer is new to you; by now there is real resume data to print, and a PDF failure can't block the kernel.
   PRD ref: `prd.md > Downloads`
@@ -100,3 +100,4 @@ Activity mode: not started
 - Slice 5: refresh does not use the end date typed at Generate. It re-scans each selected owner from the saved start date up to today, re-reading the repo list, so brand-new projects and late-pushed old commits are found. Only commits with no verdict cost AI time, and only significant commits no bullet covers become bullets (a Pass 2 failure is retried on the next refresh). `lastChecked` is still saved and shown but no longer decides what gets scanned. Learner found the original wording ("commits since `lastChecked`") confusing in practice: pushed a new project after generating and expected to see it.
 - Slice 5 verified: a project pushed after Generate (outside the typed range) was added as a bullet; a second refresh added 0 and left the resume identical; a failed refresh left `resume.json` byte-identical. Not separately exercised: refresh with Ollama stopped (the run hit GitHub's 60-requests-an-hour unauthenticated limit first; same code path, errors are thrown before any write). Tokenless owners share that 60/hour limit, and each refresh costs one call for the repo list plus one per repo, so real read-only tokens (5,000/hour) are needed for normal use.
 - Early hands-on feedback (after slice 4): works, but looks "pretty bare bones"; the learner plans to restyle it soon for more personality. Treat restyling as the learner's call at final review, not a slice.
+- Slice 6: npm blocked Puppeteer's install script (new `allowScripts` gate), so Chrome is fetched with `npx puppeteer browsers install chrome` (noted in README). Verified both endpoints return valid PDFs; traditional text extracts in order (Contact, Summary, Experience, Education, Skills; headings are uppercased by CSS); magazine PDF embeds Special Elite and Courier Prime from local files with no external requests; a missing Chrome returns the clear error message.
