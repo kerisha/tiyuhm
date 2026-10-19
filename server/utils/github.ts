@@ -87,6 +87,11 @@ export async function readOwnersConfig(): Promise<OwnerConfig[]> {
 // Checks that this owner's read-only token works. Never returns the token.
 export async function verifyOwner(owner: OwnerConfig): Promise<OwnerStatus> {
   const base = { label: owner.label, kind: owner.kind, login: owner.login }
+  if (!owner.token) {
+    // No token: public repositories only. Just confirm the owner exists.
+    const pub = await fetch(`${API}/${owner.kind === 'org' ? 'orgs' : 'users'}/${encodeURIComponent(owner.login)}`, { headers: headers() }).catch(() => null)
+    return pub?.ok ? { ...base, available: true } : { ...base, available: false, reason: "GitHub couldn't find this owner." }
+  }
   const url = owner.kind === 'org' ? `${API}/orgs/${encodeURIComponent(owner.login)}/repos?per_page=1` : `${API}/user`
   let res: Response
   try {

@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Run the triage on a range you know well and tell me whether the verdicts match your own judgment; point out any it got wrong so we can tune the prompt.
   Commit: `Add AI commit triage with Ollama adapter`
 
-- [ ] **4. Generate builds your resume and shows it**
+- [x] **4. Generate builds your resume and shows it**
   Becomes usable: Clicking Generate produces the full resume (contact, summary, experience by owner, demo education, skills), saves it, and shows it on the magazine-style `/resume` page. Opening the app again goes straight to the saved resume. The no-meaningful-commits message works.
   Why now: The first moment the product looks like the product. Real output here is what the early hands-on review judges.
   PRD ref: `prd.md > The Core Journey` (steps 6-7), `prd.md > The generated resume`, `prd.md > States and Boundaries`
@@ -96,3 +96,4 @@ Activity mode: not started
 - Slice 3: Ollama calls send `think: false`. Measured on `gemma4:12b`: about 2s per call versus about 17s with thinking on, with the same verdicts (and thinking mode returned a truncated `oneLine`). Schema-constrained output works.
 - Slice 3: verdicts in `data/verdicts.json` also store `repo`, `message` (first line) and `date` beside `significant` and `oneLine`, so the dev view and later refreshes can show what was judged. Pass 1 asks the model for a number per commit (not the SHA) and checks every number came back before saving a batch.
 - Slice 3 not covered by live test: the "unreadable JSON" retry-then-error path in `askJson` is code-reviewed but wasn't triggered against the real model. Ollama-unreachable was tested.
+- Slice 4: removed the temporary dev triage route and verdicts page now that Generate exists. An owner with an empty `token` in `owners.config.json` is treated as public-repos-only (available if the owner exists), so a tokenless entry works for public repos while real read-only tokens are still being created.

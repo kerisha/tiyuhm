@@ -1,3 +1,8 @@
+<script setup lang="ts">
+const { data: saved } = await useFetch<Resume | null>('/api/resume')
+if (saved.value) await navigateTo('/resume')
+</script>
+
 <template>
   <ResumeSheet>
     <p class="kicker">This is why you hire me</p>

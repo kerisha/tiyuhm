@@ -46,3 +46,63 @@ export const pass1Schema = {
   },
   required: ['verdicts'],
 }
+
+export interface SignificantCommit {
+  sha: string
+  repo: string
+  message: string
+  oneLine: string
+  date: string
+}
+
+// Pass 2: turn one owner's significant commits into resume bullets.
+// Tune the voice here: this is where the resume starts to sound like you.
+export function pass2Prompt(ownerLabel: string, commits: SignificantCommit[]): string {
+  const listing = commits.map((c, i) => `[${i + 1}] ${c.repo} (${c.date.slice(0, 10)}): ${c.message}\n    note: ${c.oneLine}`).join('\n')
+  return `You are writing the experience section of a software developer's resume, for their work at "${ownerLabel}".
+
+Below are their significant commits. Write resume bullets from them.
+
+Rules:
+- Group related commits into one bullet. Aim for 2 to 6 bullets in total; fewer if there is little here.
+- Start each bullet with a strong past-tense verb (Built, Shipped, Designed, Reduced, Migrated...).
+- State what was achieved and, when the commits show it, why it mattered. Do not invent numbers, tools or outcomes that the commits don't support.
+- One sentence per bullet, plain and specific, no buzzwords.
+- For each bullet list the numbers of the commits it covers as "commitIds".
+
+Commits:
+${listing}`
+}
+
+export const pass2Schema = {
+  type: 'object',
+  properties: {
+    bullets: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { text: { type: 'string' }, commitIds: { type: 'array', items: { type: 'integer' } } },
+        required: ['text', 'commitIds'],
+      },
+    },
+  },
+  required: ['bullets'],
+}
+
+// Summary and skills, written from the finished bullets so they can't claim anything the bullets don't.
+export function summaryPrompt(name: string, groups: { ownerLabel: string; bullets: string[] }[]): string {
+  const listing = groups.map((g) => `${g.ownerLabel}:\n${g.bullets.map((b) => `- ${b}`).join('\n')}`).join('\n\n')
+  return `Below are the experience bullets from ${name}'s resume.
+
+Write:
+1. "summary": a professional summary of 2 to 3 sentences, written without "I", that captures what this developer does and is good at. Use only what the bullets support.
+2. "skills": 6 to 12 concrete technical skills (languages, frameworks, tools, practices) evident in the bullets. Only include skills the bullets clearly show.
+
+${listing}`
+}
+
+export const summarySchema = {
+  type: 'object',
+  properties: { summary: { type: 'string' }, skills: { type: 'array', items: { type: 'string' } } },
+  required: ['summary', 'skills'],
+}

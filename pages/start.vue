@@ -17,13 +17,13 @@ interface Owner {
 }
 
 const username = ref('')
-const step = ref<'form' | 'loading' | 'profile' | 'error'>('form')
+const step = ref<'form' | 'loading' | 'profile' | 'error' | 'generating'>('form')
 const profile = ref<Profile | null>(null)
 const owners = ref<Owner[]>([])
 const selected = ref<string[]>([])
 const from = ref('')
 const to = ref('')
-const generateNote = ref(false)
+const generateError = ref('')
 
 const hasUsableOwners = computed(() => owners.value.some((o) => o.available))
 const datesValid = computed(() => !!from.value && !!to.value && from.value <= to.value)
@@ -48,6 +48,21 @@ async function lookUp() {
     step.value = 'error'
   }
 }
+
+async function generate() {
+  generateError.value = ''
+  step.value = 'generating'
+  try {
+    await $fetch('/api/resume/generate', {
+      method: 'POST',
+      body: { username: profile.value!.username, owners: selected.value, from: from.value, to: to.value },
+    })
+    await navigateTo('/resume')
+  } catch (e: any) {
+    generateError.value = e?.data?.statusMessage || e?.statusMessage || 'Something went wrong while writing your resume.'
+    step.value = 'profile'
+  }
+}
 </script>
 
 <template>
@@ -60,6 +75,10 @@ async function lookUp() {
       <input id="username" v-model="username" type="text" autocomplete="off" autofocus />
       <p><button class="button" :disabled="!username.trim()">Find me</button></p>
     </form>
+
+    <StatusMessage v-else-if="step === 'generating'" kind="loading" title="Reading your work">
+      Judging your commits and writing your resume. This can take a few minutes, so keep this tab open
+    </StatusMessage>
 
     <StatusMessage v-else-if="step === 'loading'" kind="loading">Looking you up on GitHub</StatusMessage>
 
@@ -104,8 +123,8 @@ async function lookUp() {
           <div><label for="to">To</label><input id="to" v-model="to" type="date" /></div>
         </div>
         <p v-if="from && to && !datesValid" class="hint">The start date has to come before the end date.</p>
-        <p><button class="button" :disabled="!canGenerate" @click="generateNote = true">Generate</button></p>
-        <p v-if="generateNote" class="hint">Generating arrives in a later step.</p>
+        <p><button class="button" :disabled="!canGenerate" @click="generate">Generate</button></p>
+        <StatusMessage v-if="generateError" kind="error" title="That didn't work">{{ generateError }}</StatusMessage>
       </template>
     </section>
   </ResumeSheet>
