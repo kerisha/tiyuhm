@@ -7,6 +7,7 @@
   --quiet: #a5a58d;
   --font-display: 'Special Elite', 'Courier New', monospace;
   --font-body: 'Courier Prime', 'Courier New', monospace;
+  --font-gothic: 'UnifrakturCook', 'Special Elite', serif;
 }
 
 * { box-sizing: border-box; }
@@ -34,6 +35,18 @@ h2 {
   border-bottom: 2px solid var(--accent);
 }
 
+.gothic { font-family: var(--font-gothic); font-weight: 700; letter-spacing: 0.02em; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.6rem 0 1rem;
+  color: var(--accent);
+  width: 100%;
+}
+.divider::before, .divider::after { content: ''; flex: 1; border-top: 3px double var(--accent); }
+
 .kicker {
   font-variant: small-caps;
   letter-spacing: 0.12em;
@@ -51,6 +64,20 @@ h2 {
   cursor: pointer;
 }
 .button:hover:not(:disabled) { background: #565a49; }
+
+/* wax-seal style button */
+.button.seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 2rem;
+  background: radial-gradient(circle at 30% 30%, #d9a98c, var(--accent) 60%, #a97a5f);
+  color: #3f4235;
+  border: 3px double #a97a5f;
+  box-shadow: 0 2px 0 rgba(63, 66, 53, 0.35);
+}
+.button.seal:hover:not(:disabled) { background: radial-gradient(circle at 30% 30%, #e0b399, #d3a086 60%, #b3846a); }
+.button.seal:disabled { background: var(--border); border-color: var(--quiet); }
 .button:disabled { background: var(--border); cursor: not-allowed; }
 
 input[type='text'] {

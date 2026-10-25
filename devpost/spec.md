@@ -23,7 +23,7 @@ Why this shape and not something bigger: no login system, no database server, no
 ## The Core Journey Through the System
 Implements `prd.md > The Core Journey`.
 
-1. **Open the app** (`/`). The server checks for `data/resume.json`. If there's none, the welcome page shows TIYUHM and **Get started**. If there is one, you're sent straight to `/resume` (`prd.md > States and Boundaries`, returning use).
+1. **Open the app** (`/`). The server checks for `data/resume.json`. The welcome page (the gate) always shows. If there's no saved resume, it shows TIYUHM and **Enter the Kingdom**, which leads to setup. If there is one, the gate greets the owner by name and **Enter the Kingdom** leads to `/resume` (`prd.md > States and Boundaries`, returning use).
 2. **Get started** reveals the profile form. You type a GitHub username.
 3. **Submit.** The browser calls `POST /api/github/profile`. The server calls GitHub for that user and shows the loading screen meanwhile. If GitHub says "not found," you see the profile-not-found message. Otherwise the server reads `owners.config.json`, checks each owner's token works, and returns the profile and the list of owners (organizations plus "Personal projects").
 4. **Pick owners.** You tick the ones to include. If none are accessible, you see the no-owners message.
@@ -98,6 +98,8 @@ Dusty Olive on Almond Cream is the only dark-on-light pairing, and its contrast 
 
 **Layout:** every screen is a centered resume-shaped sheet (single column, generous margins, a thin bronze rule under section headings) on the sand surface. The resume page adds magazine touches: large masthead name, pull-quote-style summary, section kickers in small caps. Tone of copy: short, warm, a little witty ("Let's read your work.").
 
+**Kingdom theme (post-build restyle at learner request):** the resume is the learner's domain and the reader is entering it. Welcome page is a gate (crest, "Hail, traveler.", **Enter the Kingdom**); the resume opens with "The Realm of [Name]", an initials crest and a blackletter name (UnifrakturCook, headings and name only); section headings are The Proclamation / Quests Undertaken / The Academy / The Armory with the plain word (Summary, Experience…) kept beneath each; contact labels are Hails from / Send a raven / Scrolls / Visit the keep; each owner is a "Holding"; the summary has an illuminated drop cap; the on-screen sheet has a double-rule charter border, corner flourishes and parchment grain; Download is a wax-seal button; newly refreshed bullets get a "Fresh from the field" ribbon. The PDF reuses the resume body, so it carries the crest, headings and drop cap but not the sheet frame.
+
 **PDF:** the print page reuses the on-screen resume look (palette and typewriter fonts). The separate plain "traditional" PDF was cut at build review.
 
 ## Components
@@ -106,7 +108,7 @@ Dusty Olive on Almond Cream is the only dark-on-light pairing, and its contrast 
 All pages share a `ResumeSheet` wrapper component for the one consistent look.
 
 #### Welcome page (`pages/index.vue`)
-Shows TIYUHM and **Get started**. On load, checks for a saved resume and redirects to `/resume` if one exists.
+The gate: shows TIYUHM and **Enter the Kingdom**. On load, checks for a saved resume; if one exists, it shows the owner's initials crest and name and the button leads to `/resume`, otherwise to `/start`. No automatic redirect.
 PRD ref: `prd.md > Getting started and connecting GitHub`, `prd.md > States and Boundaries`.
 
 #### Setup flow (`pages/start.vue`)
@@ -175,7 +177,7 @@ Where data lives, in the three questions: the resume is in `resume.json`; it's u
 ```
 tiyuhm/
 ├── pages/
-│   ├── index.vue                  # Welcome page; redirects if a resume is saved
+│   ├── index.vue                  # The gate; personalized and links to /resume if a resume is saved
 │   ├── start.vue                  # Setup flow: profile, owners, dates, Generate, errors
 │   ├── resume.vue                 # Magazine-style resume, downloads, refresh-on-load
 │   └── print/

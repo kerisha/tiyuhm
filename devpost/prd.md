@@ -52,6 +52,8 @@ Direction from the learner:
 
 Which color plays which role (page background, text, accents) is left to `4-spec` and the build to propose. Dusty Olive is the only dark color, so it is the natural candidate for text, and readability should be checked on screen. The PDF uses the same palette as the screen. No references beyond the palette and the magazine concept were given.
 
+**Kingdom theme (added after build, learner request):** the resume is the learner's domain and the reader is entering it. Welcome page is a gate (crest, "Hail, traveler.", **Enter the Kingdom**); the resume opens with "The Realm of [Name]", an initials crest and a blackletter name (UnifrakturCook, headings and name only); section headings are The Proclamation / Quests Undertaken / The Academy / The Armory with the plain word (Summary, Experience…) kept beneath each; contact labels are Hails from / Send a raven / Scrolls / Visit the keep; each owner is a "Holding"; the summary has an illuminated drop cap; the on-screen sheet has a double-rule charter border, corner flourishes and parchment grain; Download is a wax-seal button; newly refreshed bullets get a "Fresh from the field" ribbon. The PDF reuses the resume body, so it carries the crest, headings and drop cap but not the sheet frame.
+
 ## Features and Behavior
 
 ### Getting started and connecting GitHub
@@ -91,7 +93,7 @@ One PDF download ("Download resume"), available at any point after generation. I
 
 ## States and Boundaries
 - **First use** — welcome page with Get started.
-- **Returning use** — the saved resume is shown, not the welcome page, and is brought up to date with new significant commits (`scope.md > The Core Loop`, step 4). The learner didn't explicitly confirm this return experience (see Open Questions).
+- **Returning use** — the gate greets the owner and **Enter the Kingdom** opens the saved resume, which is brought up to date with new significant commits (`scope.md > The Core Loop`, step 4). The learner didn't explicitly confirm this return experience (see Open Questions).
 - **Loading** — shown while accessing the GitHub profile and while generating.
 - **Error: profile not found** — if the GitHub profile doesn't exist, the user sees a message giving the reason and stating that without it we cannot move forward.
 - **Error: no organizations** — if the account has no organizations to choose from, the same kind of message: reason, and that we cannot move forward.
@@ -139,5 +141,5 @@ One PDF download ("Download resume"), available at any point after generation. I
 - **Palette in the PDF.** Resolved at build: the PDF uses the same palette as the screen; the plain traditional PDF was cut.
 - **How is the time period chosen?** Assumption: a start and end date. Can be settled in `4-spec`.
 - **Skills source.** Assumption: inferred from languages and projects in the commits. Can be settled in `4-spec`.
-- **Returning-user screen.** Assumption: reopening shows the saved resume. Should be confirmed at review.
+- **Returning-user screen.** Resolved at build: reopening shows the gate first, then **Enter the Kingdom** opens the saved resume. Should be confirmed at review.
 - **Private repositories and organizations.** Settled in `4-spec`: the app reads what each owner's read-only token covers. "Organizations linked to the account" now means owners the learner has configured, including a "Personal projects" owner for repos outside any organization; the no-organizations error reads "no accessible owners." Only commits authored by the entered username count.

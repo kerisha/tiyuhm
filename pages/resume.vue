@@ -23,6 +23,8 @@ async function download() {
 }
 
 const checking = ref(false)
+const fresh = ref<string[]>([])
+const keysOf = (r: Resume | null | undefined) => (r?.experience ?? []).flatMap(g => g.bullets.map(b => b.shas.join()))
 const note = ref('')
 const noteIsError = ref(false)
 
@@ -31,8 +33,10 @@ onMounted(async () => {
   checking.value = true
   try {
     const res = await $fetch<{ resume: Resume; added: number }>('/api/resume/refresh', { method: 'POST' })
+    const before = new Set(keysOf(resume.value))
     resume.value = res.resume
-    if (res.added > 0) note.value = `Added ${res.added} new ${res.added === 1 ? 'highlight' : 'highlights'} from your recent work.`
+    fresh.value = keysOf(res.resume).filter(k => !before.has(k))
+    if (res.added > 0) note.value = `The scouts return with ${res.added} new ${res.added === 1 ? 'deed' : 'deeds'} from the field.`
   } catch (e: any) {
     noteIsError.value = true
     note.value = `Couldn't check for new work: ${e?.data?.statusMessage || 'something went wrong'}. Showing your saved resume.`
@@ -44,15 +48,15 @@ onMounted(async () => {
 
 <template>
   <ResumeSheet>
-    <StatusMessage v-if="checking" kind="loading">Checking for new work</StatusMessage>
+    <StatusMessage v-if="checking" kind="loading">The scouts are out, checking for new deeds</StatusMessage>
     <StatusMessage v-else-if="note" :kind="noteIsError ? 'error' : 'note'">{{ note }}</StatusMessage>
     <div v-if="resume" class="downloads">
-      <button class="button" :disabled="downloading" @click="download">
-        {{ downloading ? 'Making PDF…' : 'Download My Resume' }}
+      <button class="button seal" :disabled="downloading" @click="download">
+        <span aria-hidden="true">✠</span>{{ downloading ? 'Sealing the scroll…' : 'Download My Resume' }}
       </button>
     </div>
     <StatusMessage v-if="downloadError" kind="error" title="PDF problem">{{ downloadError }}</StatusMessage>
-    <ResumeBody v-if="resume" :resume="resume" />
+    <ResumeBody v-if="resume" :resume="resume" :fresh="fresh" />
   </ResumeSheet>
 </template>
 

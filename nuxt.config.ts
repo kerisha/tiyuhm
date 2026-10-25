@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     '@fontsource/special-elite',
     '@fontsource/courier-prime/400.css',
     '@fontsource/courier-prime/700.css',
+    '@fontsource/unifrakturcook/700.css',
     '~/assets/css/theme.css',
   ],
 })

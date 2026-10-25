@@ -68,7 +68,7 @@ async function generate() {
 <template>
   <ResumeSheet>
     <p class="kicker">Step one</p>
-    <h1>Who are you?</h1>
+    <h1>Who goes there?</h1>
 
     <form v-if="step === 'form'" @submit.prevent="lookUp">
       <label for="username">Your GitHub username</label>
