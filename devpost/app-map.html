@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIYUHM App Map</title>
+<style>
+  :root { --paper:#ffe8d6; --ink:#4a4e3f; --accent:#a8694a; --line:#b7b7a4; --card:#fff6ee; }
+  @media (prefers-color-scheme: dark) { :root { --paper:#2a2622; --ink:#eadfd2; --accent:#e0a98a; --line:#5b5648; --card:#35302a; } }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 "Courier New", monospace; }
+  main { max-width:48rem; margin:0 auto; padding:1.5rem 1rem 3rem; }
+  h1, h2 { color:var(--accent); } h2 { margin-top:2rem; border-bottom:1px solid var(--line); }
+  code { background:var(--card); padding:0 .25rem; }
+  .card { background:var(--card); border:1px solid var(--line); padding:.75rem 1rem; margin:.75rem 0; }
+  ol li, ul li { margin:.4rem 0; }
+  svg { width:100%; height:auto; } svg text { fill:var(--ink); font:13px "Courier New", monospace; }
+  svg rect { fill:var(--card); stroke:var(--line); } svg path { stroke:var(--accent); fill:none; stroke-width:2; }
+  summary { cursor:pointer; } a:focus, summary:focus { outline:2px solid var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<h1>TIYUHM App Map</h1>
+<p>TIYUHM reads your GitHub commits, has a local AI model judge which ones matter, and turns those into a resume page and PDF. It refreshes itself when you ship new work.</p>
+
+<h2>Main pieces</h2>
+<ul>
+  <li><strong>Pages</strong> (<code>pages/</code>): the gate, the setup form, the resume, and a print view for the PDF.</li>
+  <li><strong>Server routes</strong> (<code>server/api/</code>): thin endpoints the pages call.</li>
+  <li><strong>Pipeline</strong> (<code>server/utils/pipeline.ts</code>): the kernel. Triage, bullet writing, summary.</li>
+  <li><strong>AI adapter</strong> (<code>server/utils/ai/</code>): talks to Ollama.</li>
+  <li><strong>Storage</strong> (<code>data/*.json</code> via <code>server/utils/store.ts</code>): saved verdicts and resume.</li>
+</ul>
+
+<h2>One action: opening your resume</h2>
+<svg viewBox="0 0 640 110" role="img" aria-label="Diagram: resume page calls GET /api/resume, which reads data/resume.json, and ResumeBody draws it">
+  <rect x="5" y="30" width="130" height="50"/><text x="18" y="52">pages/resume</text><text x="18" y="70">.vue</text>
+  <rect x="175" y="30" width="140" height="50"/><text x="188" y="52">api/resume/</text><text x="188" y="70">index.get.ts</text>
+  <rect x="355" y="30" width="130" height="50"/><text x="368" y="52">data/</text><text x="368" y="70">resume.json</text>
+  <rect x="525" y="30" width="110" height="50"/><text x="535" y="52">ResumeBody</text><text x="535" y="70">.vue</text>
+  <path d="M135 55H175M315 55H355M485 55H525"/>
+</svg>
+
+<h2>Reference route (a recap, not a toured walkthrough)</h2>
+<ol>
+  <li><code>pages/resume.vue</code>: search <code>useFetch&lt;Resume | null&gt;('/api/resume')</code>. The page asks for the saved resume.</li>
+  <li><code>server/api/resume/index.get.ts</code>: a one-liner that calls <code>readJson</code> on <code>resume.json</code>.</li>
+  <li><code>components/ResumeBody.vue</code>: search <code>v-for="g in resume.experience"</code>. This draws each owner's group, including the "Vanquished" label.</li>
+</ol>
+<details class="card"><summary>Where the data comes from</summary>
+  <p><code>generateResume</code> and <code>refreshResume</code> in <code>server/utils/pipeline.ts</code> build the <code>experience</code> groups and save them with <code>writeJson('resume.json', …)</code>. They are called by <code>generate.post.ts</code> and <code>refresh.post.ts</code>.</p>
+</details>
+
+<h2>To change this, start here</h2>
+<ul>
+  <li><strong>Wording or labels on the resume</strong>: <code>components/ResumeBody.vue</code>. Example kept edit: <code>Holding</code> became <code>Vanquished</code> (search <code>class="kicker holding"</code>).</li>
+  <li><strong>Colors and fonts</strong>: <code>assets/css/theme.css</code> (variables such as <code>--paper</code>, <code>--accent</code>, <code>--font-gothic</code>).</li>
+  <li><strong>What counts as a meaningful commit</strong>: Pass 1 prompt in <code>server/utils/prompts.ts</code>, used by <code>triageCommits</code> in <code>pipeline.ts</code>.</li>
+  <li><strong>The PDF</strong>: <code>pages/print/resume.vue</code> and <code>server/api/pdf/index.get.ts</code>.</li>
+</ul>
+
+<h2>A practice to reuse</h2>
+<div class="card">
+  <p><strong>Decision:</strong> the theme lives only in the presentation layer (<code>ResumeBody.vue</code>, <code>theme.css</code>). The pipeline only produces data.</p>
+  <p><strong>Evidence:</strong> relabeling "Holding" to "Vanquished" touched one template line, and nothing in <code>pipeline.ts</code> had to change.</p>
+  <p><strong>Next project:</strong> when you ask an agent for a restyle, name that boundary in the prompt ("change only the templates and CSS, leave the data logic alone"). Your style then stays your own, and the logic stays safe.</p>
+</div>
+
+<h2>Run it again</h2>
+<p><code>npm install</code>, copy <code>.env.example</code> to <code>.env</code>, make sure Ollama is running, then <code>npm run dev</code> and open <a href="http://localhost:3000">http://localhost:3000</a>. See <code>README.md</code> for tokens and the Chrome install for PDFs.</p>
+<p><small>Snapshot of commit <code>327fec7</code> plus the "Vanquished" label. File names and anchors can drift as the code changes.</small></p>
+</main>
+</body>
+</html>

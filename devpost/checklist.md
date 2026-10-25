@@ -82,15 +82,15 @@ Build mode: fast
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: not started
-Route and stops: not started
-Edit outcome: not started
-Reflection: not started
-Activity mode: not started
+Activity and evidence: Brief recap (learner declined the walkthrough). Evidence: the learner's own relabel `Holding` → `Vanquished` in `components/ResumeBody.vue` touched only the template; the pipeline was unchanged. Practice: keep styling in the presentation layer and name that boundary when prompting.
+Route and stops: Reference route only, not toured: `pages/resume.vue` → `server/api/resume/index.get.ts` → `components/ResumeBody.vue`.
+Edit outcome: Learner's own edit `Holding` → `Vanquished` kept and committed.
+Reflection: Not asked.
+Activity mode: Recap + app map (`devpost/app-map.html`)
 
 ## Revisions
 

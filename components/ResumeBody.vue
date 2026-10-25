@@ -37,7 +37,7 @@ function month(iso: string) {
     <section>
       <h2>Quests Undertaken<span class="plain">Experience</span></h2>
       <div v-for="g in resume.experience" :key="g.ownerLabel" class="group">
-        <p class="kicker holding">Holding</p>
+        <p class="kicker holding">Vanquished</p>
         <h3>{{ g.ownerLabel }}</h3>
         <p class="period">{{ month(g.periodFrom) }} – {{ month(g.periodTo) }}</p>
         <ul>
