@@ -12,3 +12,6 @@ Reset to first-run by deleting the `data/` folder. `.env`, `owners.config.json` 
 
 ## PDFs
 The PDF button uses Puppeteer, which needs its own Chrome. If npm skipped the download, run `npx puppeteer browsers install chrome`.
+
+## Youtube video demo
+https://youtu.be/jtv2D82dPFU
